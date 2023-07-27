@@ -3,6 +3,7 @@ package telegramWork;
 import Config.BotConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
@@ -10,8 +11,13 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +26,8 @@ import java.util.List;
 public class TelegramBot extends TelegramLongPollingBot {
     @Autowired
   private BotConfig botConfig;
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
     public TelegramBot(BotConfig botConfig) {
         this.botConfig = botConfig;
@@ -64,6 +72,7 @@ public static final String  HELP_TEXT="Этот бот создан для ве�
         switch (messageText){
             case "/start":
                 startCommandReceived(chatId, update.getMessage().getChat().getUserName());
+
                 break;
             case "/help":
                 sendMessage(chatId,HELP_TEXT);
@@ -76,7 +85,8 @@ public static final String  HELP_TEXT="Этот бот создан для ве�
                 sendMessage(chatId,"команда пока в разработке");
                 break;
             case "/deletemydata":
-                sendMessage(chatId,"команда пока в разработке");
+                sendMessage(chatId,"Вы точно хотите удалить все данные о себе",deleteData(chatId));
+
                 //здесь должен быть код очистки моих записей
                 break;
             case "/getdays":
@@ -92,7 +102,20 @@ public static final String  HELP_TEXT="Этот бот создан для ве�
     }
     private void startCommandReceived(long chatId, String name ){
         String answer ="Привет,"+ name+" добро пожаловать в мой телеграмм бот-дневник.";
-        sendMessage(chatId,answer);
+        sendMessage(chatId,answer,null);
+    }
+    private void sendMessage(long chatId, String textToSend,ReplyKeyboardMarkup keyboard){//метод отправки текстов
+        SendMessage message = new SendMessage();
+        message.setChatId(String.valueOf(chatId));
+        message.setText(textToSend);
+        message.setReplyMarkup(keyboard);
+        try {
+            execute(message);
+
+        }catch (TelegramApiException e){
+
+        }
+
     }
     private void sendMessage(long chatId, String textToSend){//метод отправки текстов
         SendMessage message = new SendMessage();
@@ -104,6 +127,19 @@ public static final String  HELP_TEXT="Этот бот создан для ве�
         }catch (TelegramApiException e){
 
         }
+
+    }
+
+    private ReplyKeyboardMarkup deleteData(long id){
+
+    ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();//добавить обращение для удаления
+        KeyboardRow row = new KeyboardRow();
+        row.add("Да");
+        row.add("Нет");
+        List<KeyboardRow>keyboardRows= new ArrayList<>();
+        keyboardRows.add(row);
+        keyboard.setKeyboard(keyboardRows);
+        return keyboard;
 
     }
 }
