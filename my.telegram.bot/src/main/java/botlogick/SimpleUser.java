@@ -1,6 +1,10 @@
 package botlogick;
 
-public class SimpleUser extends  AbstactUser{
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+
+public class SimpleUser extends AbstractUser {
     public SimpleUser(String name, long ID) {
         super(name, ID);
     }
