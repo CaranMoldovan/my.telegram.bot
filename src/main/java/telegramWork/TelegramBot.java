@@ -1,8 +1,12 @@
 package telegramWork;
 
+import Command.Command;
 import Config.BotConfig;
+import botlogick.AbstractUser;
+import botlogick.AbstractUserFabric;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -11,13 +15,11 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.awt.*;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +29,16 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Autowired
   private BotConfig botConfig;
     @Autowired
-    JdbcTemplate jdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
+    @Autowired
+    @Qualifier("commandRegister")
+    private  Command register;
+    @Autowired
+    @Qualifier("commandUpdater")
+    private Command update;
+    @Autowired
+    private AbstractUserFabric usersFabric;
+
 
     public TelegramBot(BotConfig botConfig) {
         this.botConfig = botConfig;
@@ -72,14 +83,16 @@ public static final String  HELP_TEXT="Этот бот создан для ве�
         switch (messageText){
             case "/start":
                 startCommandReceived(chatId, update.getMessage().getChat().getUserName());
+                AbstractUser user = usersFabric.createNewUser(update.getMessage().getChat().getUserName(),update.getMessage().getChatId());
+                registration(user);
+                update(user);
 
-                break;
+               break;
             case "/help":
                 sendMessage(chatId,HELP_TEXT);
                 break;
             case"/creatediaryentry":
-                sendMessage(chatId,"команда пока в разработке");
-                //здесь должен быть код логики вставки нового сообщения
+                sendMessage(chatId,"команда пока в разработке");//здесь должен быть код логики вставки нового сообщения
                 break;
             case "/getdiaryentry":
                 sendMessage(chatId,"команда пока в разработке");
@@ -141,5 +154,19 @@ public static final String  HELP_TEXT="Этот бот создан для ве�
         keyboard.setKeyboard(keyboardRows);
         return keyboard;
 
+    }
+    private void registration(AbstractUser user)  {
+        try {
+            register.execute(user);
+        } catch (SQLException e) {
+            new SQLException();
+        }
+    }
+    private void update(AbstractUser user){
+        try {
+            update.execute(user);
+        } catch (SQLException e) {
+            new SQLException();
+        }
     }
 }

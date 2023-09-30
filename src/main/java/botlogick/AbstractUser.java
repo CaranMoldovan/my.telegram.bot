@@ -3,7 +3,7 @@ package botlogick;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
-abstract class AbstractUser {
+public abstract class AbstractUser {
     private  String name;
     private long ID;
     private TextWorker diary = new Diary();
