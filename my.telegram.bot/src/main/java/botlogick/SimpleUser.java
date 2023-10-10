@@ -1,8 +1,24 @@
 package botlogick;
 
-public class SimpleUser extends  AbstactUser{
+import org.jetbrains.annotations.NotNull;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+
+public class SimpleUser extends AbstractUser implements Comparable<AbstractUser> {
+
     public SimpleUser(String name, long ID) {
         super(name, ID);
+    }
+
+    @Override
+    public int getUserWaiting() {
+        return super.getUserWaiting();
+    }
+
+    @Override
+    public void setUserWaiting(Integer userWaiting) {
+        super.setUserWaiting(userWaiting);
     }
 
     @Override
@@ -18,5 +34,10 @@ public class SimpleUser extends  AbstactUser{
     @Override
     public TextWorker getDiary() {
         return super.getDiary();
+    }
+
+    @Override
+    public int compareTo(@NotNull AbstractUser o) {
+        return super.compareTo(o);
     }
 }
