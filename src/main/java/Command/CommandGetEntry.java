@@ -1,12 +1,10 @@
 package Command;
 
-import botlogick.AbstractUser;
-
 import java.sql.SQLException;
 
 public class CommandGetEntry implements Command{
     @Override
-    public void execute(AbstractUser user) throws SQLException {
-
+    public AbstractCarrier execute(AbstractCarrier message) throws SQLException {
+return message;
     }
 }

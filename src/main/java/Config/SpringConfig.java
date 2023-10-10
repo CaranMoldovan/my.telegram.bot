@@ -1,8 +1,7 @@
 package Config;
 
 import Command.*;
-import botlogick.AbstractUserFabric;
-import botlogick.SimpleUserFabric;
+import botlogick.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -22,51 +21,84 @@ import javax.sql.DataSource;
 
 public class SpringConfig {
 
-    private final  Environment environment;
+    private final Environment environment;
     private final ApplicationContext applicationContext;
-@Autowired
+
+    @Autowired
     public SpringConfig(Environment environment, ApplicationContext applicationContext) {
         this.environment = environment;
         this.applicationContext = applicationContext;
     }
 
     @Bean
-    public BotConfig botConfig(){
-        return  new BotConfig();
+    public BotConfig botConfig() {
+        return new BotConfig();
     }
+
     @Bean
-    public TelegramBot telegramBot(BotConfig botConfig){
+    public TelegramBot telegramBot(BotConfig botConfig) {
         return new TelegramBot(botConfig);
     }
+
     @Bean
-    public BotInitializer botInitializer (TelegramBot telegramBot) {
+    public BotInitializer botInitializer(TelegramBot telegramBot) {
         return new BotInitializer();
     }
+
     @Bean
-    public DataSource dataSource(){
-        DriverManagerDataSource dataSource =new DriverManagerDataSource();
+    public DataSource dataSource() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName(environment.getProperty("db.home.driver"));
         dataSource.setUrl(environment.getProperty("db.home.url"));
         dataSource.setUsername(environment.getProperty("db.home.name"));
         dataSource.setPassword(environment.getProperty("db.home.password"));
         return dataSource;
     }
+
     @Bean
-    public JdbcTemplate jdbcTemplate(){
-    return new JdbcTemplate(dataSource());
-    }
-    @Bean
-    public AbstractUserFabric SimpleUserFabric(){
-    return  new SimpleUserFabric() ;
-    }
-    @Bean
-  public Command commandRegister(){
-    return new CommandRegister();
-    }
-    @Bean
-    public Command commandUpdater(){
-    return new CommandUpdater();
+    public JdbcTemplate jdbcTemplate() {
+        return new JdbcTemplate(dataSource());
     }
 
+    @Bean
+    public AbstractUserFabric SimpleUserFabric() {
+        return new SimpleUserFabric();
+    }
+
+    @Bean
+    public Command commandRegister() {
+        return new CommandRegister();
+    }
+
+    @Bean
+    public Command commandUpdater() {
+        return new CommandUpdater();
+    }
+
+    @Bean
+    public AbstractTextControllerFabric textControllerFabric() {
+        return new TextControllerFabric();
+    }
+
+    @Bean
+    public UsersList usersList() {
+        return new UsersList();
+        }
+        @Bean
+    public Command addNewDiaryEntry(){
+        return  new CommandAddNewDiaryEntry();
+        }
+        @Bean
+    public  AbstractMessageFabric simpleMessageFabric(){
+        return new SimpleMessageFabric();
+        }
+        @Bean
+    public Command commandChangesWaiting(){
+        return new CommandChangesWaiting();
+        }
+        @Bean
+        public  Command commandHasRegisted(){
+        return new CommandHasRegisted();
+        }
 }
 
