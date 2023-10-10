@@ -4,7 +4,7 @@ package botlogick;
 import java.time.LocalDate;
 
 
-abstract class TextController implements Comparable<TextController> {
+abstract class  TextController implements Comparable<TextController> {
     LocalDate date;
     String text;
 
