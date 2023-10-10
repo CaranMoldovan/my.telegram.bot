@@ -34,4 +34,11 @@ abstract public class AbstractCarrier {
     public String getText() {
         return text;
     }
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
 }

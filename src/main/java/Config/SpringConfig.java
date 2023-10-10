@@ -100,5 +100,13 @@ public class SpringConfig {
         public  Command commandHasRegisted(){
         return new CommandHasRegisted();
         }
+        @Bean
+    public Command updateWaiting(){
+        return new CommandUpdateWaiting();
+        }
+        @Bean
+    public Command getWaiting(){
+        return new CommandGetWaiting();
+    }
 }
 
