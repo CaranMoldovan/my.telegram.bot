@@ -31,10 +31,7 @@ public class SimpleUser extends AbstractUser implements Comparable<AbstractUser>
         return super.getID();
     }
 
-    @Override
-    public TextWorker getDiary() {
-        return super.getDiary();
-    }
+
 
     @Override
     public int compareTo(@NotNull AbstractUser o) {

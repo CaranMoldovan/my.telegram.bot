@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 public abstract class AbstractUser implements Comparable<AbstractUser> {
     private  String name;
     private long ID;
-    private TextWorker diary = new Diary();
     private Integer userWaiting;
     @Autowired
     @Qualifier("commandChangesWaiting")
@@ -38,9 +37,7 @@ public abstract class AbstractUser implements Comparable<AbstractUser> {
         return ID;
     }
 
-    public TextWorker getDiary() {
-        return diary;
-    }
+
 
     @Override
     public int compareTo(@NotNull AbstractUser o) {

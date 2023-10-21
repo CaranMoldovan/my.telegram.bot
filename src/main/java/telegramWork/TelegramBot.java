@@ -2,10 +2,8 @@ package telegramWork;
 
 import DAOCommand.*;
 import Config.BotConfig;
-import botlogick.AbstractTextControllerFabric;
 import botlogick.AbstractUser;
 import botlogick.AbstractUserFabric;
-import botlogick.UsersList;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,11 +38,6 @@ public class TelegramBot extends TelegramLongPollingBot {
     private Command updater;
     @Autowired
     private AbstractUserFabric usersFabric;
-    @Autowired
-    @Qualifier("textControllerFabric")
-    private AbstractTextControllerFabric textControllerFabric;
-    @Autowired
-    private UsersList users;
 
     @Autowired
     @Qualifier("addNewDiaryEntry")
@@ -266,18 +259,10 @@ new  SQLException();
     }
 
 
-    private AbstractUser hasUser(Update update){
-        if (users.binarySearch(update.getMessage().getChatId())!=null){
-           return users.binarySearch(update.getMessage().getChatId());
-        }
-        AbstractUser user = userCreator(update.getMessage().getChat().getUserName(),update.getMessage().getChatId());
-        users.add(user);
-        return user ;
-    }
+
     private AbstractUser createUser(Update update) {
    AbstractUser user= usersFabric.createNewUser(update.getMessage().getChat().getUserName(),update.getMessage().getChatId());
-    users.add(user);
-    return  user;
+   return  user;
 }
 
 

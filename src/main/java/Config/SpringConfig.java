@@ -76,15 +76,7 @@ public class SpringConfig {
         return new CommandUpdater();
     }
 
-    @Bean
-    public AbstractTextControllerFabric textControllerFabric() {
-        return new TextControllerFabric();
-    }
 
-    @Bean
-    public UsersList usersList() {
-        return new UsersList();
-        }
         @Bean
     public Command addNewDiaryEntry(){
         return  new CommandAddNewDiaryEntry();
