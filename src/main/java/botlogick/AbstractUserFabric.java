@@ -1,7 +1,9 @@
 package botlogick;
 
  public abstract class AbstractUserFabric {
-    public abstract AbstractUser createNewUser(String username, long ID);
+    public AbstractUser createNewUser(String username, long ID){
+        return new SimpleUser(username,ID);
 
+    }
     }
 

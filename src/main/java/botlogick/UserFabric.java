@@ -3,10 +3,9 @@ package botlogick;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SimpleUserFabric extends AbstractUserFabric  {
+public class UserFabric extends AbstractUserFabric  {
     @Override
     public AbstractUser createNewUser(String username, long ID) {
-
-        return new SimpleUser(username,ID);
+        return super.createNewUser(username, ID);
     }
 }

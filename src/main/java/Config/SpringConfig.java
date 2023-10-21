@@ -62,7 +62,7 @@ public class SpringConfig {
     }
 
     @Bean
-    public AbstractUserFabric SimpleUserFabric() {
+    public AbstractUserFabric userFabric(){
         return new SimpleUserFabric();
     }
 
