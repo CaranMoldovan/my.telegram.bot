@@ -11,6 +11,7 @@ abstract class TextWorker {
 
     public TextWorker() {
         texts=new ArrayList<>();
+        textFabric=new TextControllerFabric();
     }
 
     TextController giveAText(LocalDate date) {
@@ -22,6 +23,7 @@ abstract class TextWorker {
         }
         throw new RuntimeException("Нет такой записи");
     }
+
     public void add(LocalDate date, String text) {
         texts.add(textFabric.createNewTextController(date, text));
     }

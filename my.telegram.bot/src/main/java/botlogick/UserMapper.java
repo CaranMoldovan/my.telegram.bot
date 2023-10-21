@@ -8,7 +8,7 @@ import java.sql.SQLException;
 public class UserMapper implements RowMapper<AbstractUser> {
     @Override
     public AbstractUser mapRow(ResultSet resultSet, int i) throws SQLException {
-        AbstractUserFabric abstractUserFabric = new SimpleUserFabric();
+        AbstractUserFabric abstractUserFabric = new UserFabric();
        return abstractUserFabric.createNewUser(resultSet.getString("username"),resultSet.getLong("user_id"));
     }
 }

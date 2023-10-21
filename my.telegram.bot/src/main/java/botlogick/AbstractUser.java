@@ -1,33 +1,21 @@
 package botlogick;
 
-import Command.Command;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
-public abstract class AbstractUser implements Comparable<AbstractUser> {
+abstract class AbstractUser {
     private  String name;
     private long ID;
     private TextWorker diary = new Diary();
-    private Integer userWaiting;
     @Autowired
-    @Qualifier("commandChangesWaiting")
-    Command changesWaiting;
+   private ApplicationContext context;
+   @Autowired
+   private JdbcTemplate jdbcTemplate;
+
 
     public AbstractUser(String name, long ID) {
         this.name = name;
         this.ID = ID;
-        this.userWaiting=0;
-
-    }
-
-    public int getUserWaiting() {
-        return userWaiting;
-    }
-
-    public void setUserWaiting(Integer userWaiting) {
-        this.userWaiting = userWaiting;
 
     }
 
@@ -41,16 +29,6 @@ public abstract class AbstractUser implements Comparable<AbstractUser> {
 
     public TextWorker getDiary() {
         return diary;
-    }
-
-    @Override
-    public int compareTo(@NotNull AbstractUser o) {
-        if (ID>o.getID()){
-            return 1;
-        }else if (ID<o.getID()) {
-            return -1;
-        }
-        return 0;
     }
 
 }
