@@ -1,4 +1,4 @@
-package Command;
+package DAOCommand;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -16,7 +16,7 @@ public class CommandUpdateWaiting implements Command{
         return toReturn;
     }
     private AbstractCarrier updateWaiting(AbstractCarrier message){
-        jdbcTemplate.update(SQL,message.getUser().getUserWaiting(),message.getUser().getUserWaiting());
+        jdbcTemplate.update(SQL,message.getUser().getUserWaiting(),message.getUser().getID());
         return message;
     }
 }

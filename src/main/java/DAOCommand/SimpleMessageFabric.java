@@ -1,4 +1,4 @@
-package Command;
+package DAOCommand;
 
 import botlogick.AbstractUser;
 import org.springframework.stereotype.Component;

@@ -1,11 +1,10 @@
 package botlogick;
 
-import Command.Command;
+import DAOCommand.Command;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationContext;
-import org.springframework.jdbc.core.JdbcTemplate;
+
 public abstract class AbstractUser implements Comparable<AbstractUser> {
     private  String name;
     private long ID;

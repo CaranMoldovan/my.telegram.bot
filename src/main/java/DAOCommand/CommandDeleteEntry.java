@@ -1,10 +1,10 @@
-package Command;
+package DAOCommand;
 
 import java.sql.SQLException;
 
-public class CommandGetEntry implements Command{
+public class CommandDeleteEntry implements Command{
     @Override
     public AbstractCarrier execute(AbstractCarrier message) throws SQLException {
-return message;
+return  message;
     }
 }

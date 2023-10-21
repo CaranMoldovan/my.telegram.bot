@@ -1,7 +1,6 @@
-package Command;
+package DAOCommand;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +16,7 @@ public class CommandRegister implements Command{
 
     @Override
     public AbstractCarrier execute(AbstractCarrier message) throws SQLException {
+        message.getUser().setUserWaiting(1);
        AbstractCarrier toReturn = RegisterUser(message);
         return toReturn;
     }

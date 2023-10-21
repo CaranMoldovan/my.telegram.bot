@@ -1,6 +1,6 @@
 package Config;
 
-import Command.*;
+import DAOCommand.*;
 import botlogick.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -13,6 +13,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import telegramWork.TelegramBot;
 
 import javax.sql.DataSource;
+import java.time.format.DateTimeFormatter;
 
 
 @Configuration
@@ -107,6 +108,24 @@ public class SpringConfig {
         @Bean
     public Command getWaiting(){
         return new CommandGetWaiting();
+    }
+    @Bean
+    public Command getEntry(){
+        return new CommandGetEntry();
+    }
+    @Bean
+    public DateTimeFormatter dateTimeFormatter(){
+ return DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+    }
+
+    @Bean
+    public Command getDays(){
+        return new CommandGetDays();
+    }
+    @Bean
+    public Command deleteUser(){
+        return new  CommandDeleteUser();
     }
 }
 

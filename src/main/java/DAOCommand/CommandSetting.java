@@ -1,4 +1,4 @@
-package Command;
+package DAOCommand;
 
 import java.sql.SQLException;
 

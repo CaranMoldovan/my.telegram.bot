@@ -1,6 +1,6 @@
 package telegramWork;
 
-import Command.*;
+import DAOCommand.*;
 import Config.BotConfig;
 import botlogick.AbstractTextControllerFabric;
 import botlogick.AbstractUser;
@@ -17,15 +17,11 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
-import org.telegram.telegrambots.meta.generics.BotOptions;
-import org.telegram.telegrambots.meta.generics.LongPollingBot;
 
-import java.sql.SQLException;
 import java.time.LocalDate;
+import java.sql.SQLException;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,6 +61,17 @@ private Command updateWaiting;
 @Autowired
 @Qualifier("getWaiting")
 private Command getWaiting;
+@Autowired
+@Qualifier("getEntry")
+private Command getEntry;
+@Autowired
+private DateTimeFormatter formatter;
+@Autowired
+@Qualifier("getDays")
+private Command getGetEntryDay;
+@Autowired
+    @Qualifier("deleteUser")
+    private Command deleteUser;
 
 
     public TelegramBot(BotConfig botConfig) {
@@ -108,10 +115,13 @@ private static final String  HELP_TEXT="Этот бот создан для ве
         String messageText = null;//метод принятия сообщений
     if (update.hasMessage()&&update.getMessage().hasText()){
        messageText  =update.getMessage().getText();}
+
         long chatId=update.getMessage().getChatId();
         AbstractUser user =createUser(update);
         AbstractCarrier carrier = createCarrier(user);
+        hasRegisted(carrier);
        carrier = getWaiting(carrier);
+
        switch (carrier.getUser().getUserWaiting()){
            case 0:
             fistCommandWorking(messageText,chatId,carrier,update);
@@ -120,11 +130,45 @@ private static final String  HELP_TEXT="Этот бот создан для ве
                carrier.setText(update.getMessage().getText());
                carrier.setDate(LocalDate.now());
                setAddNewEntry(carrier);
+               carrier.getUser().setUserWaiting(0);
+               updateWaiting(carrier);
                break;
+           case 2:
+               carrier.setDate(LocalDate.parse(messageText,formatter));
+               getEntry(carrier);
+               sendMessage(carrier.getUser().getID(),carrier.getText());
+               carrier.getUser().setUserWaiting(0);
+               updateWaiting(carrier);
+               break;
+           case 3:
+               carrier.setText(messageText);
+               deleteUser(carrier);
+
+           }
             }
+
+
+    private void deleteUser(AbstractCarrier carrier) {
+        switch (carrier.getText()){
+            case "/yes":
+                try {
+                    deleteUser.execute(carrier);
+                } catch (SQLException e) {
+                    new SQLException();
+                }
+                break;
+                case "/no":
+                carrier.getUser().setUserWaiting(0);
+                updateWaiting(carrier);
+                break;
+            default:
+                sendMessage(carrier.getUser().getID(),"Ошибка ввода команды");
         }
 
-        private void fistCommandWorking(String messageText,long chatId, AbstractCarrier carrier,Update update){
+
+    }
+
+    private void fistCommandWorking(String messageText,long chatId, AbstractCarrier carrier,Update update){
             switch (messageText) {
                 case "/start":
                     startCommandReceived(chatId, update.getMessage().getChat().getUserName());
@@ -139,16 +183,20 @@ private static final String  HELP_TEXT="Этот бот создан для ве
                     updateWaiting(carrier);
                     break;
                 case "/getdiaryentry":
-                    sendMessage(chatId, "команда пока в разработке");
+                    carrier.getUser().setUserWaiting(2);
+                    updateWaiting(carrier);
+                    sendMessage(carrier.getUser().getID(),"Введите дату своего сообщения в формате dd-mm-yyyy");
                     break;
                 case "/deletemydata":
                     sendMessage(chatId, "Вы точно хотите удалить все данные о себе");
-
+                    carrier.getUser().setUserWaiting(3);
+                    updateWaiting(carrier);
                     //здесь должен быть код очистки моих записей
                     break;
                 case "/getdays":
                     //здесь должен быть код получения дней своих записей
-                    sendMessage(chatId, "команда пока в разработке");
+                    carrier = getEntryDays(carrier);
+                    sendMessage(carrier.getUser().getID(),carrier.datesToString());
                     break;
 
                 default:
@@ -178,7 +226,6 @@ private static final String  HELP_TEXT="Этот бот создан для ве
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
-        System.out.println(message.getText());
         try {
             execute(message);
 
@@ -240,6 +287,23 @@ private  AbstractCarrier createCarrier(AbstractUser user) {
 AbstractCarrier carrier =simpleMessageFabric.createNewMessage(user,null,null);
         return carrier;
 
+}
+private AbstractCarrier getEntry(AbstractCarrier carrier){
+    try {
+     carrier = getEntry.execute(carrier);
+    } catch (SQLException e) {
+        new SQLException();
+    }
+    return carrier;
+
+}
+private AbstractCarrier getEntryDays(AbstractCarrier carrier){
+    try {
+        getGetEntryDay.execute(carrier);
+    } catch (SQLException e) {
+        throw new RuntimeException(e);
+    }
+    return carrier;
 }
 
 
