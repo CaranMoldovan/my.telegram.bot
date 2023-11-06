@@ -1,0 +1,690 @@
+Subject: [PATCH] new command logick
+---
+Index: src/main/java/Command/CommandDeleteUser.java
+===================================================================
+diff --git a/src/main/java/Command/CommandDeleteUser.java b/src/main/java/Command/CommandDeleteUser.java
+deleted file mode 100644
+--- a/src/main/java/Command/CommandDeleteUser.java	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
++++ /dev/null	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
+@@ -1,10 +0,0 @@
+-package Command;
+-
+-import java.sql.SQLException;
+-
+-public class CommandDeleteUser implements Command{
+-    @Override
+-    public AbstractCarrier execute(AbstractCarrier message) throws SQLException {
+-return message;
+-    }
+-}
+Index: src/main/java/Command/CommandGetDays.java
+===================================================================
+diff --git a/src/main/java/Command/CommandGetDays.java b/src/main/java/Command/CommandGetDays.java
+deleted file mode 100644
+--- a/src/main/java/Command/CommandGetDays.java	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
++++ /dev/null	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
+@@ -1,11 +0,0 @@
+-package Command;
+-
+-import java.sql.SQLException;
+-
+-public class CommandGetDays implements Command{
+-    @Override
+-    public AbstractCarrier execute(AbstractCarrier message) throws SQLException {
+-return message;
+-    }
+-
+-}
+Index: src/main/java/Command/CommandGetEntry.java
+===================================================================
+diff --git a/src/main/java/Command/CommandGetEntry.java b/src/main/java/Command/CommandGetEntry.java
+deleted file mode 100644
+--- a/src/main/java/Command/CommandGetEntry.java	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
++++ /dev/null	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
+@@ -1,10 +0,0 @@
+-package Command;
+-
+-import java.sql.SQLException;
+-
+-public class CommandGetEntry implements Command{
+-    @Override
+-    public AbstractCarrier execute(AbstractCarrier message) throws SQLException {
+-return message;
+-    }
+-}
+Index: src/main/java/Config/SpringConfig.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/Config/SpringConfig.java b/src/main/java/Config/SpringConfig.java
+--- a/src/main/java/Config/SpringConfig.java	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
++++ b/src/main/java/Config/SpringConfig.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -1,6 +1,6 @@
+ package Config;
+ 
+-import Command.*;
++import DAOCommand.*;
+ import botlogick.*;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.context.ApplicationContext;
+@@ -13,6 +13,7 @@
+ import telegramWork.TelegramBot;
+ 
+ import javax.sql.DataSource;
++import java.time.format.DateTimeFormatter;
+ 
+ 
+ @Configuration
+@@ -108,5 +109,23 @@
+     public Command getWaiting(){
+         return new CommandGetWaiting();
+     }
++    @Bean
++    public Command getEntry(){
++        return new CommandGetEntry();
++    }
++    @Bean
++    public DateTimeFormatter dateTimeFormatter(){
++ return DateTimeFormatter.ofPattern("dd-MM-yyyy");
++
++    }
++
++    @Bean
++    public Command getDays(){
++        return new CommandGetDays();
++    }
++    @Bean
++    public Command deleteUser(){
++        return new  CommandDeleteUser();
++    }
+ }
+ 
+Index: src/main/java/Command/AbstractCarrier.java
+===================================================================
+diff --git a/src/main/java/Command/AbstractCarrier.java b/src/main/java/DAOCommand/AbstractCarrier.java
+rename from src/main/java/Command/AbstractCarrier.java
+rename to src/main/java/DAOCommand/AbstractCarrier.java
+--- a/src/main/java/Command/AbstractCarrier.java	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
++++ b/src/main/java/DAOCommand/AbstractCarrier.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -1,13 +1,15 @@
+-package Command;
++package DAOCommand;
+ 
+ import botlogick.AbstractUser;
+ 
+ import java.time.LocalDate;
++import java.util.List;
+ 
+ abstract public class AbstractCarrier {
+     private AbstractUser user;
+     private LocalDate date;
+     private String text;
++    private List<LocalDate> dates;
+ 
+     public AbstractCarrier(AbstractUser user) {
+         this.user = user;
+@@ -22,6 +24,21 @@
+         this.user= user;
+         this.text=text;
+     }
++    public List<LocalDate> getDates(){
++        return dates;
++    }
++    public void setDates(List<LocalDate> dates){
++        this.dates=dates;
++    }
++    public String datesToString(){
++        StringBuilder sb = new StringBuilder();
++        for (LocalDate date : dates) {
++            sb.append(date.toString());
++            sb.append(System.lineSeparator());
++        }
++        return sb.toString();
++    }
++
+ 
+     public AbstractUser getUser() {
+         return user;
+Index: src/main/java/Command/AbstractMessageFabric.java
+===================================================================
+diff --git a/src/main/java/Command/AbstractMessageFabric.java b/src/main/java/DAOCommand/AbstractMessageFabric.java
+rename from src/main/java/Command/AbstractMessageFabric.java
+rename to src/main/java/DAOCommand/AbstractMessageFabric.java
+--- a/src/main/java/Command/AbstractMessageFabric.java	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
++++ b/src/main/java/DAOCommand/AbstractMessageFabric.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -1,4 +1,4 @@
+-package Command;
++package DAOCommand;
+ 
+ import botlogick.AbstractUser;
+ 
+Index: src/main/java/Command/Command.java
+===================================================================
+diff --git a/src/main/java/Command/Command.java b/src/main/java/DAOCommand/Command.java
+rename from src/main/java/Command/Command.java
+rename to src/main/java/DAOCommand/Command.java
+--- a/src/main/java/Command/Command.java	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
++++ b/src/main/java/DAOCommand/Command.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -1,4 +1,4 @@
+-package Command;
++package DAOCommand;
+ 
+ 
+ import java.sql.SQLException;
+Index: src/main/java/Command/CommandAddNewDiaryEntry.java
+===================================================================
+diff --git a/src/main/java/Command/CommandAddNewDiaryEntry.java b/src/main/java/DAOCommand/CommandAddNewDiaryEntry.java
+rename from src/main/java/Command/CommandAddNewDiaryEntry.java
+rename to src/main/java/DAOCommand/CommandAddNewDiaryEntry.java
+--- a/src/main/java/Command/CommandAddNewDiaryEntry.java	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
++++ b/src/main/java/DAOCommand/CommandAddNewDiaryEntry.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -1,4 +1,4 @@
+-package Command;
++package DAOCommand;
+ 
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.jdbc.core.JdbcTemplate;
+@@ -8,14 +8,14 @@
+ public class CommandAddNewDiaryEntry implements Command {
+     @Autowired
+     private JdbcTemplate jdbcTemplate;
+-    private String command= "INSERT INTO diary_entry (user_id, entry_text, время) VALUES (?, ?, ?)";
++    private String command= "INSERT INTO diary_entry (user_id,date_entry,text) VALUES (?,?,?)";
+     @Override
+     public AbstractCarrier execute(AbstractCarrier message) throws SQLException {
+        AbstractCarrier toReturn = inputNewDiary(message);
+         return toReturn;
+     }
+ private  AbstractCarrier inputNewDiary(AbstractCarrier message){
+-        jdbcTemplate.update(command,message.getUser().getID(),message.getText(),message.getDate());
++        jdbcTemplate.update(command,message.getUser().getID(),message.getDate(),message.getText());
+         return message;
+ }
+ 
+Index: src/main/java/Command/CommandChangesWaiting.java
+===================================================================
+diff --git a/src/main/java/Command/CommandChangesWaiting.java b/src/main/java/DAOCommand/CommandChangesWaiting.java
+rename from src/main/java/Command/CommandChangesWaiting.java
+rename to src/main/java/DAOCommand/CommandChangesWaiting.java
+--- a/src/main/java/Command/CommandChangesWaiting.java	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
++++ b/src/main/java/DAOCommand/CommandChangesWaiting.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -1,4 +1,4 @@
+-package Command;
++package DAOCommand;
+ 
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.jdbc.core.JdbcTemplate;
+Index: src/main/java/Command/CommandDeleteEntry.java
+===================================================================
+diff --git a/src/main/java/Command/CommandDeleteEntry.java b/src/main/java/DAOCommand/CommandDeleteEntry.java
+rename from src/main/java/Command/CommandDeleteEntry.java
+rename to src/main/java/DAOCommand/CommandDeleteEntry.java
+--- a/src/main/java/Command/CommandDeleteEntry.java	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
++++ b/src/main/java/DAOCommand/CommandDeleteEntry.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -1,4 +1,4 @@
+-package Command;
++package DAOCommand;
+ 
+ import java.sql.SQLException;
+ 
+Index: src/main/java/DAOCommand/CommandDeleteUser.java
+===================================================================
+diff --git a/src/main/java/DAOCommand/CommandDeleteUser.java b/src/main/java/DAOCommand/CommandDeleteUser.java
+new file mode 100644
+--- /dev/null	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
++++ b/src/main/java/DAOCommand/CommandDeleteUser.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -0,0 +1,25 @@
++package DAOCommand;
++
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.jdbc.core.JdbcTemplate;
++import org.springframework.stereotype.Component;
++
++import java.sql.SQLException;
++@Component
++public class CommandDeleteUser implements Command{
++    @Autowired
++    JdbcTemplate jdbcTemplate;
++    private final String DELETE_WAITING ="DELETE From waiting WHERE user_id=?";
++    private final String DELETE_ENTRYES ="DELETE from diary_entry WHERE user_id=?";
++    private final String DELETE_USER="DELETE FROM users WHERE user_id=? ";
++    @Override
++    public AbstractCarrier execute(AbstractCarrier message) throws SQLException {
++return deleteUser(message);
++    }
++    private AbstractCarrier deleteUser(AbstractCarrier carrier){
++        jdbcTemplate.update(DELETE_ENTRYES,carrier.getUser().getID());
++        jdbcTemplate.update(DELETE_WAITING,carrier.getUser().getID() );
++        jdbcTemplate.update(DELETE_USER,carrier.getUser().getID()   );
++        return carrier;
++    }
++}
+Index: src/main/java/DAOCommand/CommandGetDays.java
+===================================================================
+diff --git a/src/main/java/DAOCommand/CommandGetDays.java b/src/main/java/DAOCommand/CommandGetDays.java
+new file mode 100644
+--- /dev/null	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
++++ b/src/main/java/DAOCommand/CommandGetDays.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -0,0 +1,28 @@
++package DAOCommand;
++
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.jdbc.core.JdbcTemplate;
++import org.springframework.stereotype.Component;
++
++import java.sql.SQLException;
++import java.time.LocalDate;
++import java.util.List;
++
++
++@Component
++public class CommandGetDays implements Command{
++    @Autowired
++ JdbcTemplate jdbcTemplate;
++private final String SQL="SELECT date_entry FROM diary_entry WHERE user_id = ?";
++    @Override
++    public AbstractCarrier execute(AbstractCarrier message) throws SQLException {
++        message = getEntryesDate(message);
++return message;
++    }
++    private AbstractCarrier getEntryesDate(AbstractCarrier carrier){
++        List<LocalDate> dates=jdbcTemplate.query(SQL,new Object[]{carrier.getUser().getID()},new LocalDateMapper());
++        carrier.setDates(dates);
++        return carrier;
++    }
++
++}
+Index: src/main/java/DAOCommand/CommandGetEntry.java
+===================================================================
+diff --git a/src/main/java/DAOCommand/CommandGetEntry.java b/src/main/java/DAOCommand/CommandGetEntry.java
+new file mode 100644
+--- /dev/null	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
++++ b/src/main/java/DAOCommand/CommandGetEntry.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -0,0 +1,27 @@
++package DAOCommand;
++
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.jdbc.core.JdbcTemplate;
++import org.springframework.stereotype.Component;
++
++import java.sql.SQLException;
++
++@Component
++public class CommandGetEntry implements Command{
++    @Autowired
++    JdbcTemplate jdbcTemplate;
++            private final String SQL="SELECT text FROM diary_entry where user_id=? and date_entry=?";
++    @Override
++    public AbstractCarrier execute(AbstractCarrier message) throws SQLException {
++        message = getEntry(message);
++return message;
++    }
++    private AbstractCarrier getEntry(AbstractCarrier message){
++
++        message.setText(jdbcTemplate.queryForObject(SQL, String.class,message.getUser().getID(),message.getDate()));
++        if (message.getText()==null){
++            throw new RuntimeException("ввод неправильной даты" );
++        }
++        return message;
++    }
++}
+Index: src/main/java/Command/CommandGetNewUser.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/Command/CommandGetNewUser.java b/src/main/java/DAOCommand/CommandGetNewUser.java
+rename from src/main/java/Command/CommandGetNewUser.java
+rename to src/main/java/DAOCommand/CommandGetNewUser.java
+--- a/src/main/java/Command/CommandGetNewUser.java	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
++++ b/src/main/java/DAOCommand/CommandGetNewUser.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -1,6 +1,5 @@
+-package Command;
++package DAOCommand;
+ 
+-import botlogick.SimpleUser;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.jdbc.core.JdbcTemplate;
+ import org.springframework.stereotype.Component;
+Index: src/main/java/Command/CommandGetWaiting.java
+===================================================================
+diff --git a/src/main/java/Command/CommandGetWaiting.java b/src/main/java/DAOCommand/CommandGetWaiting.java
+rename from src/main/java/Command/CommandGetWaiting.java
+rename to src/main/java/DAOCommand/CommandGetWaiting.java
+--- a/src/main/java/Command/CommandGetWaiting.java	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
++++ b/src/main/java/DAOCommand/CommandGetWaiting.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -1,6 +1,5 @@
+-package Command;
++package DAOCommand;
+ 
+-import org.aopalliance.reflect.Class;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.jdbc.core.JdbcTemplate;
+ import org.springframework.stereotype.Component;
+Index: src/main/java/Command/CommandHasRegisted.java
+===================================================================
+diff --git a/src/main/java/Command/CommandHasRegisted.java b/src/main/java/DAOCommand/CommandHasRegisted.java
+rename from src/main/java/Command/CommandHasRegisted.java
+rename to src/main/java/DAOCommand/CommandHasRegisted.java
+--- a/src/main/java/Command/CommandHasRegisted.java	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
++++ b/src/main/java/DAOCommand/CommandHasRegisted.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -1,4 +1,4 @@
+-package Command;
++package DAOCommand;
+ 
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.beans.factory.annotation.Qualifier;
+Index: src/main/java/Command/CommandRegister.java
+===================================================================
+diff --git a/src/main/java/Command/CommandRegister.java b/src/main/java/DAOCommand/CommandRegister.java
+rename from src/main/java/Command/CommandRegister.java
+rename to src/main/java/DAOCommand/CommandRegister.java
+--- a/src/main/java/Command/CommandRegister.java	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
++++ b/src/main/java/DAOCommand/CommandRegister.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -1,7 +1,6 @@
+-package Command;
++package DAOCommand;
+ 
+ import org.springframework.beans.factory.annotation.Autowired;
+-import org.springframework.beans.factory.annotation.Qualifier;
+ import org.springframework.jdbc.core.JdbcTemplate;
+ import org.springframework.stereotype.Component;
+ 
+@@ -17,6 +16,7 @@
+ 
+     @Override
+     public AbstractCarrier execute(AbstractCarrier message) throws SQLException {
++        message.getUser().setUserWaiting(1);
+        AbstractCarrier toReturn = RegisterUser(message);
+         return toReturn;
+     }
+Index: src/main/java/Command/CommandSetting.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/Command/CommandSetting.java b/src/main/java/DAOCommand/CommandSetting.java
+rename from src/main/java/Command/CommandSetting.java
+rename to src/main/java/DAOCommand/CommandSetting.java
+--- a/src/main/java/Command/CommandSetting.java	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
++++ b/src/main/java/DAOCommand/CommandSetting.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -1,4 +1,4 @@
+-package Command;
++package DAOCommand;
+ 
+ import java.sql.SQLException;
+ 
+Index: src/main/java/Command/CommandUpdateWaiting.java
+===================================================================
+diff --git a/src/main/java/Command/CommandUpdateWaiting.java b/src/main/java/DAOCommand/CommandUpdateWaiting.java
+rename from src/main/java/Command/CommandUpdateWaiting.java
+rename to src/main/java/DAOCommand/CommandUpdateWaiting.java
+--- a/src/main/java/Command/CommandUpdateWaiting.java	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
++++ b/src/main/java/DAOCommand/CommandUpdateWaiting.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -1,4 +1,4 @@
+-package Command;
++package DAOCommand;
+ 
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.jdbc.core.JdbcTemplate;
+@@ -16,7 +16,7 @@
+         return toReturn;
+     }
+     private AbstractCarrier updateWaiting(AbstractCarrier message){
+-        jdbcTemplate.update(SQL,message.getUser().getUserWaiting(),message.getUser().getUserWaiting());
++        jdbcTemplate.update(SQL,message.getUser().getUserWaiting(),message.getUser().getID());
+         return message;
+     }
+ }
+Index: src/main/java/Command/CommandUpdater.java
+===================================================================
+diff --git a/src/main/java/Command/CommandUpdater.java b/src/main/java/DAOCommand/CommandUpdater.java
+rename from src/main/java/Command/CommandUpdater.java
+rename to src/main/java/DAOCommand/CommandUpdater.java
+--- a/src/main/java/Command/CommandUpdater.java	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
++++ b/src/main/java/DAOCommand/CommandUpdater.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -1,4 +1,4 @@
+-package Command;
++package DAOCommand;
+ 
+ import botlogick.AbstractUser;
+ import org.springframework.beans.factory.annotation.Autowired;
+Index: src/main/java/DAOCommand/LocalDateMapper.java
+===================================================================
+diff --git a/src/main/java/DAOCommand/LocalDateMapper.java b/src/main/java/DAOCommand/LocalDateMapper.java
+new file mode 100644
+--- /dev/null	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
++++ b/src/main/java/DAOCommand/LocalDateMapper.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -0,0 +1,14 @@
++package DAOCommand;
++
++import org.springframework.jdbc.core.RowMapper;
++
++import java.sql.ResultSet;
++import java.sql.SQLException;
++import java.time.LocalDate;
++
++public class LocalDateMapper implements RowMapper<LocalDate> {
++    @Override
++    public LocalDate mapRow(ResultSet rs, int rowNum) throws SQLException {
++        return rs.getDate("date_entry").toLocalDate();
++    }
++}
+Index: src/main/java/Command/SimpleCarrier.java
+===================================================================
+diff --git a/src/main/java/Command/SimpleCarrier.java b/src/main/java/DAOCommand/SimpleCarrier.java
+rename from src/main/java/Command/SimpleCarrier.java
+rename to src/main/java/DAOCommand/SimpleCarrier.java
+--- a/src/main/java/Command/SimpleCarrier.java	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
++++ b/src/main/java/DAOCommand/SimpleCarrier.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -1,4 +1,4 @@
+-package Command;
++package DAOCommand;
+ 
+ import botlogick.AbstractUser;
+ 
+Index: src/main/java/Command/SimpleMessageFabric.java
+===================================================================
+diff --git a/src/main/java/Command/SimpleMessageFabric.java b/src/main/java/DAOCommand/SimpleMessageFabric.java
+rename from src/main/java/Command/SimpleMessageFabric.java
+rename to src/main/java/DAOCommand/SimpleMessageFabric.java
+--- a/src/main/java/Command/SimpleMessageFabric.java	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
++++ b/src/main/java/DAOCommand/SimpleMessageFabric.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -1,4 +1,4 @@
+-package Command;
++package DAOCommand;
+ 
+ import botlogick.AbstractUser;
+ import org.springframework.stereotype.Component;
+Index: src/main/java/botlogick/AbstractUser.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/botlogick/AbstractUser.java b/src/main/java/botlogick/AbstractUser.java
+--- a/src/main/java/botlogick/AbstractUser.java	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
++++ b/src/main/java/botlogick/AbstractUser.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -1,11 +1,10 @@
+ package botlogick;
+ 
+-import Command.Command;
++import DAOCommand.Command;
+ import org.jetbrains.annotations.NotNull;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.beans.factory.annotation.Qualifier;
+-import org.springframework.context.ApplicationContext;
+-import org.springframework.jdbc.core.JdbcTemplate;
++
+ public abstract class AbstractUser implements Comparable<AbstractUser> {
+     private  String name;
+     private long ID;
+Index: src/main/java/telegramWork/TelegramBot.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/telegramWork/TelegramBot.java b/src/main/java/telegramWork/TelegramBot.java
+--- a/src/main/java/telegramWork/TelegramBot.java	(revision 60c44a0bbfc0c8d8ee15377541a007b59bb169f5)
++++ b/src/main/java/telegramWork/TelegramBot.java	(revision 3e8103f68112c47f85c3f1d9828a16842e7f9289)
+@@ -1,6 +1,6 @@
+ package telegramWork;
+ 
+-import Command.*;
++import DAOCommand.*;
+ import Config.BotConfig;
+ import botlogick.AbstractTextControllerFabric;
+ import botlogick.AbstractUser;
+@@ -17,15 +17,11 @@
+ import org.telegram.telegrambots.meta.api.objects.Update;
+ import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
+ import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
+-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+-import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
+-import org.telegram.telegrambots.meta.generics.BotOptions;
+-import org.telegram.telegrambots.meta.generics.LongPollingBot;
+ 
+-import java.sql.SQLException;
+ import java.time.LocalDate;
++import java.sql.SQLException;
++import java.time.format.DateTimeFormatter;
+ import java.util.ArrayList;
+ import java.util.List;
+ 
+@@ -65,6 +61,17 @@
+ @Autowired
+ @Qualifier("getWaiting")
+ private Command getWaiting;
++@Autowired
++@Qualifier("getEntry")
++private Command getEntry;
++@Autowired
++private DateTimeFormatter formatter;
++@Autowired
++@Qualifier("getDays")
++private Command getGetEntryDay;
++@Autowired
++    @Qualifier("deleteUser")
++    private Command deleteUser;
+ 
+ 
+     public TelegramBot(BotConfig botConfig) {
+@@ -108,10 +115,13 @@
+         String messageText = null;//метод принятия сообщений
+     if (update.hasMessage()&&update.getMessage().hasText()){
+        messageText  =update.getMessage().getText();}
++
+         long chatId=update.getMessage().getChatId();
+         AbstractUser user =createUser(update);
+         AbstractCarrier carrier = createCarrier(user);
++        hasRegisted(carrier);
+        carrier = getWaiting(carrier);
++
+        switch (carrier.getUser().getUserWaiting()){
+            case 0:
+             fistCommandWorking(messageText,chatId,carrier,update);
+@@ -120,11 +130,45 @@
+                carrier.setText(update.getMessage().getText());
+                carrier.setDate(LocalDate.now());
+                setAddNewEntry(carrier);
++               carrier.getUser().setUserWaiting(0);
++               updateWaiting(carrier);
+                break;
++           case 2:
++               carrier.setDate(LocalDate.parse(messageText,formatter));
++               getEntry(carrier);
++               sendMessage(carrier.getUser().getID(),carrier.getText());
++               carrier.getUser().setUserWaiting(0);
++               updateWaiting(carrier);
++               break;
++           case 3:
++               carrier.setText(messageText);
++               deleteUser(carrier);
++
++           }
+             }
++
++
++    private void deleteUser(AbstractCarrier carrier) {
++        switch (carrier.getText()){
++            case "/yes":
++                try {
++                    deleteUser.execute(carrier);
++                } catch (SQLException e) {
++                    new SQLException();
++                }
++                break;
++                case "/no":
++                carrier.getUser().setUserWaiting(0);
++                updateWaiting(carrier);
++                break;
++            default:
++                sendMessage(carrier.getUser().getID(),"Ошибка ввода команды");
+         }
++
++
++    }
+ 
+-        private void fistCommandWorking(String messageText,long chatId, AbstractCarrier carrier,Update update){
++    private void fistCommandWorking(String messageText,long chatId, AbstractCarrier carrier,Update update){
+             switch (messageText) {
+                 case "/start":
+                     startCommandReceived(chatId, update.getMessage().getChat().getUserName());
+@@ -139,16 +183,20 @@
+                     updateWaiting(carrier);
+                     break;
+                 case "/getdiaryentry":
+-                    sendMessage(chatId, "команда пока в разработке");
++                    carrier.getUser().setUserWaiting(2);
++                    updateWaiting(carrier);
++                    sendMessage(carrier.getUser().getID(),"Введите дату своего сообщения в формате dd-mm-yyyy");
+                     break;
+                 case "/deletemydata":
+                     sendMessage(chatId, "Вы точно хотите удалить все данные о себе");
+-
++                    carrier.getUser().setUserWaiting(3);
++                    updateWaiting(carrier);
+                     //здесь должен быть код очистки моих записей
+                     break;
+                 case "/getdays":
+                     //здесь должен быть код получения дней своих записей
+-                    sendMessage(chatId, "команда пока в разработке");
++                    carrier = getEntryDays(carrier);
++                    sendMessage(carrier.getUser().getID(),carrier.datesToString());
+                     break;
+ 
+                 default:
+@@ -178,7 +226,6 @@
+         SendMessage message = new SendMessage();
+         message.setChatId(String.valueOf(chatId));
+         message.setText(textToSend);
+-        System.out.println(message.getText());
+         try {
+             execute(message);
+ 
+@@ -240,6 +287,23 @@
+ AbstractCarrier carrier =simpleMessageFabric.createNewMessage(user,null,null);
+         return carrier;
+ 
++}
++private AbstractCarrier getEntry(AbstractCarrier carrier){
++    try {
++     carrier = getEntry.execute(carrier);
++    } catch (SQLException e) {
++        new SQLException();
++    }
++    return carrier;
++
++}
++private AbstractCarrier getEntryDays(AbstractCarrier carrier){
++    try {
++        getGetEntryDay.execute(carrier);
++    } catch (SQLException e) {
++        throw new RuntimeException(e);
++    }
++    return carrier;
+ }
+ 
+ 
